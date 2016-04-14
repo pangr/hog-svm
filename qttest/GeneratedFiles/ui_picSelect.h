@@ -20,7 +20,7 @@
 
 QT_BEGIN_NAMESPACE
 
-class Ui_Dialog
+class Ui_Dialog2
 {
 public:
     QPushButton *next;
@@ -73,7 +73,7 @@ public:
 };
 
 namespace Ui {
-    class Dialog: public Ui_Dialog {};
+    class Dialog2: public Ui_Dialog2 {};
 } // namespace Ui
 
 QT_END_NAMESPACE

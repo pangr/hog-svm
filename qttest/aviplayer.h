@@ -1,3 +1,6 @@
+#pragma once
+#pragma execution_character_set("utf-8")
+
 #ifndef AVIPLATER_H
 #define AVIPLATER_H
 
@@ -6,13 +9,15 @@
 #include <fstream>
 #include <io.h>
 #include <string>
+#include <follower.h>
+
 
 class aviplayer
 {
 public:
 	aviplayer();
 	~aviplayer();
-	void playavi(char* avipath, char * savepath);
+	void playavi(const char* avipath, char * savepath);
 	void dopicture(char* loadpath, char * savepath);
 public:
 	CvCapture *capture;
@@ -29,7 +34,8 @@ public:
 	bool is_select;
 	vector<Rect> found;
 	HOGDescriptor hog;
-	//HOGDescriptor hog2;
+	kalman * kal;
+	HOGDescriptor hog2;
 private:
     void cvMouseCallback(int mouseEvent, int x, int y ,int flags);
 	friend void on_Mouse(int mouseEvent, int x, int y, int flags, void* param);

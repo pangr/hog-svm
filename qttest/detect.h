@@ -1,3 +1,6 @@
+#pragma once
+#pragma execution_character_set("utf-8")
+
 #ifndef DETECT_H
 #define DETECT_H
 

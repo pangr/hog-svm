@@ -1,8 +1,11 @@
+ 
 #include "aviplayer.h"
 
 #include <qdebug.h>
 #include <qwidget.h>
 #include <detect.h>
+#include <ctime>
+
 
 using namespace std;
 
@@ -16,7 +19,7 @@ aviplayer::aviplayer()
 	pt = cvPoint(0, 0);
 	pt1 = cvPoint(0, 0);
 	pt2 = cvPoint(0, 0);
-	count_tmp = 841;
+	count_tmp = 3018;
 	speed = 33;
 	rad = 0;
 	is_select = false;
@@ -27,11 +30,12 @@ aviplayer::~aviplayer()
 	cvDestroyWindow("AVI player");
 }
 
-void aviplayer::playavi(char * avipath,char * savepath)
+void aviplayer::playavi(const char * avipath,char * savepath)
 {
 	hog = HOGDescriptor(Size(96, 104), Size(16, 16), Size(8, 8), Size(8, 8), 18);
-	//hog2 = HOGDescriptor(Size(192, 32), Size(16, 16), Size(8, 8), Size(8, 8), 18);
+	hog2 = HOGDescriptor(Size(96, 104), Size(16, 16), Size(8, 8), Size(8, 8), 18);
 	hog.load("hog.xml");
+	hog2.load("hog2.xml");
 	capture = cvCaptureFromAVI(avipath);
 	cvNamedWindow("AVI player",1);
 	cvSetMouseCallback("AVI player", on_Mouse, this);
@@ -43,45 +47,95 @@ void aviplayer::playavi(char * avipath,char * savepath)
 	bool suspend = false;
 	long num = 0;
 	char tmpfile[10] = { '\0' };
+	kal = new kalman(350, 287, cvRect(10, 85, 310, 135));
+	CvRect inRect = cvRect(10, 85, 310, 135);
+	CvRect outRect = cvRect(375, 85, 310, 135);
+	int a[16] = { 2300, 4620, 5589, 11000, 13442, 16670, 18799, 21164, 22978, 24945, 26690, 30147, 31299, 32700, 35312, 36780 };
+	int b[16] = { 2400, 4815, 5790, 11291, 13840, 17203, 19430, 21850, 23380, 25348, 26976, 30418, 31391, 32970, 35485, 37393 };
+
+	int j = 0;
+
+	cvSetCaptureProperty(capture, CV_CAP_PROP_POS_FRAMES, a[0]);
+	frame_out = a[0];
 	while (!suspend)
 	{
 
-		while ((frame = cvQueryFrame(capture)) != NULL)
+		while ((frame = cvQueryFrame(capture)) != NULL && j < 16)
 		{
-			cvSetImageROI(frame, cvRect(10, 85, 310, 135));
-			IplImage * img = cvCreateImage(cvSize(310, 135), frame->depth, frame->nChannels);
-			cvCopy(frame, img);
-			cvResetImageROI(frame);
-			IplImage * imgtmp = cvCloneImage(frame);
-			cvRectangle(imgtmp, cvPoint(10, 85), cvPoint(320, 220), CV_RGB(0, 0, 255), 1);
-			if (num % 2 == 0)
+			if (frame_out != b[j])
 			{
-				hog.detectMultiScale(img, found, 0, Size(8, 8), Size(32, 32), 1.05, 2);
-			}
+				cvSetImageROI(frame, inRect);
+				hog.detectMultiScale(frame, found, 0, Size(8, 8), Size(32, 32), 1.05, 2);
+				cvResetImageROI(frame);
+				IplImage * imgtmp = cvCloneImage(frame);
+				cvRectangle(imgtmp, cvPoint(inRect.x, inRect.y), cvPoint(inRect.x + inRect.width, inRect.y + inRect.height), CV_RGB(0, 0, 255), 1);
 
-			if (found.size() > 0)
-			{
-				for (int i = 0; i<found.size(); i++)
+				if (found.size() > 0)
 				{
-					CvRect tempRect = cvRect(found[i].x + 10, found[i].y + 85, found[i].width, found[i].height);
-					if (num % 5 == 0)
+					for (int i = 0; i<found.size(); i++)
 					{
-						/*cvSetImageROI(frame, tempRect);
+						//kal->kal_predict(found[i].x + 10 + (found[i].width*0.5), found[i].y + 85 + (found[i].height*0.5));
+						kal->updatelist(found[i].x + 10 + (found[i].width*0.5), found[i].y + 85 + (found[i].height*0.5));
+						qDebug("%f,%f", found[i].x + 10 + (found[i].width*0.5), found[i].y + 85 + (found[i].height*0.5));
+						CvRect tempRect = cvRect(found[i].x + inRect.x, found[i].y + inRect.y, found[i].width, found[i].height);
+
+						cvSetImageROI(frame, tempRect);
 						sprintf(tmpfile, "%s//false%d.jpg", savepath, count_tmp);
 						cvSaveImage(tmpfile, frame);
 						cvResetImageROI(frame);
-						++count_tmp;*/
+						++count_tmp;
+
+						cvRectangle(imgtmp, cvPoint(tempRect.x, tempRect.y),
+							cvPoint(tempRect.x + tempRect.width, tempRect.y + tempRect.height), CV_RGB(220, 0, 0), 2);
 					}
-					cvRectangle(imgtmp, cvPoint(tempRect.x, tempRect.y),
-						cvPoint(tempRect.x + tempRect.width, tempRect.y + tempRect.height), CV_RGB(220, 0, 0), 2);
+					//kal->showlist(true,);
 				}
+				else
+				{
+					//kal->showlist(false);
+				}
+				cvSetImageROI(frame, outRect);
+				hog.detectMultiScale(frame, found, 0, Size(8, 8), Size(32, 32), 1.05, 2);
+				cvResetImageROI(frame);
+				cvRectangle(imgtmp, cvPoint(outRect.x, outRect.y), cvPoint(outRect.x + outRect.width, outRect.y + outRect.height), CV_RGB(0, 0, 255), 1);
+
+				if (found.size() > 0)
+				{
+					for (int i = 0; i<found.size(); i++)
+					{
+						//kal->kal_predict(found[i].x + 10 + (found[i].width*0.5), found[i].y + 85 + (found[i].height*0.5));
+						kal->updatelist(found[i].x + outRect.x + (found[i].width*0.5), found[i].y + outRect.y + (found[i].height*0.5));
+						qDebug("%f,%f", found[i].x + outRect.x + (found[i].width*0.5), found[i].y + outRect.y + (found[i].height*0.5));
+						CvRect tempRect = cvRect(found[i].x + outRect.x, found[i].y + outRect.y, found[i].width, found[i].height);
+
+						cvSetImageROI(frame, tempRect);
+						sprintf(tmpfile, "%s//false%d.jpg", savepath, count_tmp);
+						cvSaveImage(tmpfile, frame);
+						cvResetImageROI(frame);
+						++count_tmp;
+
+						cvRectangle(imgtmp, cvPoint(tempRect.x, tempRect.y),
+							cvPoint(tempRect.x + tempRect.width, tempRect.y + tempRect.height), CV_RGB(220, 0, 0), 2);
+					}
+					//kal->showlist(true);
+				}
+				else
+				{
+					//kal->showlist(false);
+				}
+				num++;
+				cvShowImage("AVI player", imgtmp);
+				cvSetTrackbarPos("Position", "AVI player", frame_out);
+				frame_out++;
+				cvReleaseImage(&imgtmp);
 			}
-			num++;
-			cvShowImage("AVI player", imgtmp);
-			cvSetTrackbarPos("Position", "AVI player", frame_out);
-			frame_out++;
-			cvReleaseImage(&img);
-			cvReleaseImage(&imgtmp);
+			else
+			{
+				j++;
+				frame_out = a[j];
+				cvSetCaptureProperty(capture, CV_CAP_PROP_POS_FRAMES, a[j]);
+			}
+			
 			char c = cvWaitKey(speed);
 			if (c == ' ')
 			{
@@ -133,8 +187,8 @@ void aviplayer::capPicture(IplImage* frame,char * savepath)
 	cvSetImageROI(frame, cvRect(0,0,frame->width,frame->height*0.5));
 	for (int i = 0; i < 4; i++)
 	{
-		cvsize[0].width = frame->width * (1-(float)(i+2)/10.0);
-		cvsize[0].height = frame->height * (1 - (float)(i+2) / 10.0) *0.5;
+		cvsize[0].width = frame->width * (1-(float)i/10.0);
+		cvsize[0].height = frame->height * (1 - (float)i / 10.0) *0.5;
 		min[i] = cvCreateImage(cvsize[0], frame->depth, frame->nChannels);
 		cvResize(frame, min[i], CV_INTER_AREA);
 	}
@@ -201,23 +255,23 @@ void aviplayer::cvMouseCallback(int mouseEvent, int x, int y, int flags)
 	switch (mouseEvent)
 	{
 	case CV_EVENT_LBUTTONDOWN:
-		pt1.x = cvPoint(x, y).x - 32;
-		pt1.y = cvPoint(x, y).y - 32;
-		pt2.x = cvPoint(x, y).x + 32;
-		pt2.y = cvPoint(x, y).y + 32;
+		pt1.x = cvPoint(x, y).x - 48;
+		pt1.y = cvPoint(x, y).y - 52;
+		pt2.x = cvPoint(x, y).x + 48;
+		pt2.y = cvPoint(x, y).y + 52;
 		pt = cvPoint(x, y);
-		rad = 30;
+		rad = 36;
 		is_select = true;
 		break;
 	case CV_EVENT_MOUSEMOVE:
 		if (is_select)
 		{
 			pt = cvPoint(x, y);
-			rad = 30;
-			pt1.x = cvPoint(x, y).x - 32;
-			pt1.y = cvPoint(x, y).y - 32;
-			pt2.x = cvPoint(x, y).x + 32;
-			pt2.y = cvPoint(x, y).y + 32;
+			rad = 36;
+			pt1.x = cvPoint(x, y).x - 48;
+			pt1.y = cvPoint(x, y).y - 52;
+			pt2.x = cvPoint(x, y).x + 48;
+			pt2.y = cvPoint(x, y).y + 52;
 		}
 		break;
 	case CV_EVENT_LBUTTONUP:
@@ -225,11 +279,11 @@ void aviplayer::cvMouseCallback(int mouseEvent, int x, int y, int flags)
 		{
 			is_select = false;
 			pt = cvPoint(x, y);
-			rad = 30;
-			pt1.x = cvPoint(x, y).x - 32;
-			pt1.y = cvPoint(x, y).y - 32;
-			pt2.x = cvPoint(x, y).x + 32;
-			pt2.y = cvPoint(x, y).y + 32;
+			rad = 36;
+			pt1.x = cvPoint(x, y).x - 48;
+			pt1.y = cvPoint(x, y).y - 52;
+			pt2.x = cvPoint(x, y).x + 48;
+			pt2.y = cvPoint(x, y).y + 52;
 		}
 		break;
 	default:

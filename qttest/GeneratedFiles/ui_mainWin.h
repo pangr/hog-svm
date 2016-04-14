@@ -44,12 +44,12 @@ public:
     {
         if (qttestClass->objectName().isEmpty())
             qttestClass->setObjectName(QStringLiteral("qttestClass"));
-        qttestClass->resize(195, 392);
+        qttestClass->resize(193, 392);
         centralWidget = new QWidget(qttestClass);
         centralWidget->setObjectName(QStringLiteral("centralWidget"));
         verticalLayoutWidget = new QWidget(centralWidget);
         verticalLayoutWidget->setObjectName(QStringLiteral("verticalLayoutWidget"));
-        verticalLayoutWidget->setGeometry(QRect(9, 0, 171, 331));
+        verticalLayoutWidget->setGeometry(QRect(10, 0, 171, 331));
         verticalLayout_5 = new QVBoxLayout(verticalLayoutWidget);
         verticalLayout_5->setSpacing(6);
         verticalLayout_5->setContentsMargins(11, 11, 11, 11);
@@ -83,7 +83,7 @@ public:
         qttestClass->setCentralWidget(centralWidget);
         menuBar = new QMenuBar(qttestClass);
         menuBar->setObjectName(QStringLiteral("menuBar"));
-        menuBar->setGeometry(QRect(0, 0, 195, 23));
+        menuBar->setGeometry(QRect(0, 0, 193, 23));
         qttestClass->setMenuBar(menuBar);
         mainToolBar = new QToolBar(qttestClass);
         mainToolBar->setObjectName(QStringLiteral("mainToolBar"));

@@ -79,7 +79,7 @@ void PicSelect::showPic(string imgpath)
 	ui.imagelabel_2->setPixmap(QPixmap::fromImage(*qimg2));
 	ui.imagelabel_2->resize(ui.imagelabel_2->pixmap()->size());
 	cvRectangle(img,cvPoint(0,0),cvPoint(96,104),cvScalar(255,255,255));
-	cvCircle(img, cvPoint(48, 52), 36, cvScalar(255, 255, 255));
+	cvCircle(img, cvPoint(48, 52), 30, cvScalar(255, 255, 255));
     qimg = new QImage((const unsigned char*)(img->imageData), img->width, img->height, QImage::Format_RGB888);
 	ui.imagelabel->setPixmap(QPixmap::fromImage(*qimg));
 	ui.imagelabel->resize(ui.imagelabel->pixmap()->size());

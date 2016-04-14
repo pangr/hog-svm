@@ -1,3 +1,6 @@
+#pragma once
+#pragma execution_character_set("utf-8")
+
 #ifndef PICSELECT_H
 #define PICSELECT_H
 
@@ -24,7 +27,7 @@ public:
 	void showPic(string imgpath);
 
 private:
-	Ui::Dialog ui;
+	Ui::Dialog2 ui;
 	vector<string> picpaths;
 	long hFile;
 	string imgpath;

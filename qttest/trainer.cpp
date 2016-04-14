@@ -1,3 +1,4 @@
+
 #include "trainer.h"
 #include <qdebug.h>
 
@@ -19,7 +20,7 @@ void samplesTrain(string imgpa, Mat &sampleFeatureMat, Mat &sampleLabelMat, int 
 	string imgpath;
 	cout << imgpa << endl;
 	long hfile2 = 0;
-
+	char tmpfile[10] = { '\0' };
 	if ((hFile = _findfirst(imgpath.assign(imgpa).append("\\*").c_str(), &fileinfo)) != -1)
 	{
 		int num = firstnum;
@@ -31,7 +32,9 @@ void samplesTrain(string imgpa, Mat &sampleFeatureMat, Mat &sampleLabelMat, int 
 			}
 			else
 			{
-				qDebug("doing %s-------%d\n", fileinfo.name,num);
+				qDebug("处理 %s-------%d\n", fileinfo.name,num);
+				/*sprintf(tmpfile, "处理 %s-------%d\n",fileinfo.name,num);
+				plain->appendPlainText(tmpfile);*/
 				imgpath.assign(imgpa).append("\\").append(fileinfo.name);
 				Mat src = imread(imgpath);
 				vector<float> descriptors;
@@ -40,6 +43,7 @@ void samplesTrain(string imgpa, Mat &sampleFeatureMat, Mat &sampleLabelMat, int 
 					sampleFeatureMat.at<float>(num, i) = descriptors[i];
 				sampleLabelMat.at<float>(num, 0) = label;
 				num++;
+				
 			}
 		} while (_findnext(hFile, &fileinfo) == 0);
 	}
@@ -57,7 +61,7 @@ void svmTrain(HOGDescriptor hog, string posdir, string negdir, char* savepath, Q
 	hogSVM svm;
 
 	samplesTrain(posdir, sampleFeatureMat, sampleLabelMat, 0, hog, 1,plain);
-	samplesTrain(negdir, sampleFeatureMat, sampleLabelMat, posSamNO, hog, -1,plain);
+	samplesTrain(negdir, sampleFeatureMat, sampleLabelMat, posSamNO, hog, 0,plain);
 
 	qDebug() << "SVM training" << endl;
 	CvTermCriteria criteria = cvTermCriteria(CV_TERMCRIT_ITER + CV_TERMCRIT_EPS, 2147483647, FLT_EPSILON);

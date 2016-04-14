@@ -1,14 +1,24 @@
+#pragma once
+#pragma execution_character_set("utf-8")
+
 #ifndef QTTEST_H
 #define QTTEST_H
 
 #include <QtWidgets/QMainWindow>
 #include <Qlabel>
 #include <QTimer>
+#include <string>
 #include <QtGui\QPaintEvent>  
 #include "ui_mainWin.h"
 
 #include <opencv/cv.h>
 #include <opencv/highgui.h>
+#include <follower.h>
+#include <ctime>
+#include <dialog.h>
+
+using namespace std;
+using namespace cv;
 
 class qttest : public QMainWindow
 {
@@ -27,12 +37,19 @@ private:
 	IplImage *frame;
 	IplImage *ipimage;
 	QImage *qImg;
-	IplImage *tmp;
-	IplImage *dettmp;
+	vector<Rect> fod;
+	CvRect inRect;
+	CvRect outRect;
+	HOGDescriptor hog;
+	kalman  *kal;
+	float start, finish;
+	bool ispause;
 protected:
-	void paintEvent(QPaintEvent *e);
+	void paintEvent(QPaintEvent *);
+	void keyPressEvent(QKeyEvent *);
+public:
 	QImage *cvIpImgtoQimg();
-    void dopicture();
+    void dopicture(HOGDescriptor &hog);
 private slots:
     void OpenImageClicked();
 	void pictureCapture();
@@ -40,6 +57,7 @@ private slots:
 	void selectpic();
 	void train();
 	void updateplain();
+	void receiveData(hogSize);
 };
 
 #endif // QTTEST_H

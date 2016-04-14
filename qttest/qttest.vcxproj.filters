@@ -68,6 +68,18 @@
     <ClCompile Include="detect.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="follower.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Debug\moc_dialog.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Release\moc_dialog.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
+    <ClCompile Include="dialog.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="qttest.qrc">
@@ -88,6 +100,12 @@
     <CustomBuild Include="picSelect.h">
       <Filter>Header Files</Filter>
     </CustomBuild>
+    <CustomBuild Include="dialog.h">
+      <Filter>Header Files</Filter>
+    </CustomBuild>
+    <CustomBuild Include="dialog.ui">
+      <Filter>Form Files</Filter>
+    </CustomBuild>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="GeneratedFiles\ui_mainWin.h">
@@ -101,6 +119,12 @@
     </ClInclude>
     <ClInclude Include="detect.h">
       <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="follower.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="GeneratedFiles\ui_dialog.h">
+      <Filter>Generated Files</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
